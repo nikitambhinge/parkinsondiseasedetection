@@ -1,0 +1,110 @@
+import numpy as np
+import pandas as pd
+import os, sys
+from sklearn.preprocessing import MinMaxScaler
+from xgboost import XGBClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+from google.colab import files
+uploaded = files.upload()
+
+df=pd.read_csv('parkinsons.data')
+df.head()
+df
+
+
+
+features=df.loc[:,df.columns!='status'].values[:,1:]
+
+labels=df.loc[:,'status'].values
+
+print(labels[labels==1].shape[0], labels[labels==0].shape[0])
+
+
+scaler=MinMaxScaler((-1,1))
+
+x=scaler.fit_transform(features)
+
+y=labels
+
+x_train,x_test,y_train,y_test=train_test_split(x, y, test_size=0.2, random_state=7)
+model=XGBClassifier(eval_metric='mlogloss')
+
+model.fit(x_train,y_train)
+
+y_pred=model.predict(x_test)
+
+print(accuracy_score(y_test, y_pred)*100)
+
+
+from sklearn.metrics import confusion_matrix
+
+pd.DataFrame(
+
+    confusion_matrix(y_test, y_pred),
+
+    columns=['Predicted Healthy', 'Predicted Parkinsons'],
+
+    index=['True Healthy', 'True Parkinsons']
+
+)
+
+#fitting the model in SVM
+from sklearn.svm import SVC
+classifi2 = SVC()
+classifi2.fit(x_train,y_train)
+y2_pred = classifi2.predict(x_test)
+print(accuracy_score(y_test, y2_pred)*100)
+from sklearn.metrics import confusion_matrix
+
+pd.DataFrame(
+
+    confusion_matrix(y_test, y2_pred),
+
+    columns=['Predicted Healthy', 'Predicted Parkinsons'],
+
+    index=['True Healthy', 'True Parkinsons']
+
+)
+
+#predicting reults
+
+
+#RANDOM FOREST
+from sklearn.model_selection import train_test_split
+X = df.drop('status', axis=1)
+
+
+X = X.drop('name', axis=1)
+
+y = df['status']
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+
+from sklearn.ensemble import RandomForestClassifier
+
+random_forest = RandomForestClassifier(n_estimators=30, max_depth=10, random_state=1)
+
+
+
+
+from sklearn.metrics import accuracy_score
+random_forest.fit(X_train, y_train)
+
+y_predict = random_forest.predict(X_test)
+
+accuracy_score(y_test, y_predict)
+
+#Confusion Matrix 
+from sklearn.metrics import confusion_matrix
+
+
+pd.DataFrame(
+
+confusion_matrix(y_test, y_predict),
+
+columns=['Predicted Healthy', 'Predicted Parkinsons'],
+
+index=['True Healthy', 'True Parkinsons']
+
+)
